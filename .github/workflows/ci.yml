@@ -21,6 +21,7 @@ jobs:
           - os: ubuntu
             deps:
               - libwayland-dev
+              - libasound2-dev
           - os: macos
             deps: [ ]
           - os: windows
