@@ -20,11 +20,11 @@ jobs:
         platform:
           - os: ubuntu
             deps:
-              - libwayland-client0
+              - libwayland-dev
           - os: macos
-            deps: []
+            deps: [ ]
           - os: windows
-            deps: []
+            deps: [ ]
         toolchain:
           - stable
           - beta
