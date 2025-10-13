@@ -14,9 +14,13 @@ concurrency:
 jobs:
   build_and_test:
     name: Rust project - latest
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.platform }}-latest
     strategy:
       matrix:
+        platform:
+          - ubuntu
+          - macos
+          - windows
         toolchain:
           - stable
           - beta
