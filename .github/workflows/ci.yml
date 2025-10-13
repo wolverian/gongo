@@ -16,6 +16,7 @@ jobs:
     name: Rust project - latest
     runs-on: ${{ matrix.platform }}-latest
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - ubuntu
