@@ -31,4 +31,4 @@ opt-level = "s"
 strip = "debuginfo"
 
 [dependencies]
-bevy = "0.17.2"
+bevy = { version = "0.17.2", features = ["debug_glam_assert", "debug", "bevy_dev_tools"] }
