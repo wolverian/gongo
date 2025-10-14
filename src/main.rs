@@ -3,6 +3,7 @@ use bevy::math::prelude::*;
 use bevy::prelude::*;
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
+#[cfg(target_os = "macos")]
 use std::env;
 
 #[derive(Resource)]
