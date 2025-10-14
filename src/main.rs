@@ -47,7 +47,9 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(MeshPickingPlugin)
+        .insert_resource(RandomSource(ChaCha8Rng::seed_from_u64(42)))
         .insert_resource(DebugPickingMode::Normal)
+        .insert_resource(Arena(Rectangle::new(800., 600.)))
         .insert_resource(State {
             mob_spawn_timer: Timer::from_seconds(
                 settings.initial_mob_spawn_timer_interval,
@@ -74,16 +76,18 @@ fn spawn_mobs(
     mut state: ResMut<State>,
     time: Res<Time>,
 ) {
-    if state.mob_spawn_timer.tick(time.delta()).just_finished() {
-        let rng = &mut rand_source.0;
-        let pos = arena.0.sample_interior(rng);
-        commands.spawn((
-            Mesh2d(spawn_meshes.circle.clone()),
-            MeshMaterial2d(spawn_colors.red.clone()),
-            Transform::from_translation(Vec3::new(pos.x, pos.y, 0.0))
-                .with_scale(Vec3::splat(state.mob_scale)),
-        ));
+    if !state.mob_spawn_timer.tick(time.delta()).just_finished() {
+        return;
     }
+
+    let rng = &mut rand_source.0;
+    let pos = arena.0.sample_interior(rng);
+    commands.spawn((
+        Mesh2d(spawn_meshes.circle.clone()),
+        MeshMaterial2d(spawn_colors.red.clone()),
+        Transform::from_translation(Vec3::new(pos.x, pos.y, 0.0))
+            .with_scale(Vec3::splat(state.mob_scale)),
+    ));
 }
 
 fn spawn_boubas(
@@ -95,16 +99,18 @@ fn spawn_boubas(
     mut state: ResMut<State>,
     time: Res<Time>,
 ) {
-    if state.bouba_spawn_timer.tick(time.delta()).just_finished() {
-        let rng = &mut rand_source.0;
-        let pos = arena.0.sample_interior(rng);
-        commands.spawn((
-            Mesh2d(spawn_meshes.circle.clone()),
-            MeshMaterial2d(spawn_colors.blue.clone()),
-            Transform::from_translation(Vec3::new(pos.x, pos.y, 0.0))
-                .with_scale(Vec3::splat(state.bouba_scale)),
-        ));
+    if !state.bouba_spawn_timer.tick(time.delta()).just_finished() {
+        return;
     }
+
+    let rng = &mut rand_source.0;
+    let pos = arena.0.sample_interior(rng);
+    commands.spawn((
+        Mesh2d(spawn_meshes.circle.clone()),
+        MeshMaterial2d(spawn_colors.blue.clone()),
+        Transform::from_translation(Vec3::new(pos.x, pos.y, 0.0))
+            .with_scale(Vec3::splat(state.bouba_scale)),
+    ));
 }
 
 fn setup(
@@ -113,8 +119,6 @@ fn setup(
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     // resources
-    let seeded_rng = ChaCha8Rng::seed_from_u64(19878367467712);
-    commands.insert_resource(RandomSource(seeded_rng));
     let mob_size = 16.;
     let spawn_meshes = Meshes {
         circle: meshes.add(Circle::new(mob_size)),
@@ -123,10 +127,9 @@ fn setup(
         red: materials.add(Color::hsl(0., 0.92, 0.61)),
         blue: materials.add(Color::hsl(240., 0.92, 0.61)),
     };
-    let arena = Arena(Rectangle::new(800., 600.));
     commands.insert_resource(spawn_meshes);
     commands.insert_resource(spawn_colors);
-    commands.insert_resource(arena);
+
     // entities
     commands.spawn(Camera2d);
 }
