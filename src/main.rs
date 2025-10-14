@@ -1,6 +1,6 @@
-use bevy::dev_tools::picking_debug::DebugPickingMode;
 use bevy::math::prelude::*;
 use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
 #[cfg(target_os = "macos")]
@@ -46,10 +46,11 @@ fn main() {
         initial_bouba_spawn_timer_interval: 1.0,
     };
     App::new()
+        // Plugins
         .add_plugins(DefaultPlugins)
-        .add_plugins(MeshPickingPlugin)
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
+        // Resources
         .insert_resource(RandomSource(ChaCha8Rng::seed_from_u64(42)))
-        .insert_resource(DebugPickingMode::Normal)
         .insert_resource(Arena(Rectangle::new(800., 600.)))
         .insert_resource(State {
             mob_spawn_timer: Timer::from_seconds(
@@ -63,6 +64,10 @@ fn main() {
             mob_scale: 1.,
             bouba_scale: 2.,
         })
+        // Debug plugins
+        .add_plugins(MeshPickingPlugin)
+        .add_plugins(RapierDebugRenderPlugin::default())
+        // Systems
         .add_systems(Startup, setup)
         .add_systems(FixedUpdate, (spawn_mobs, spawn_boubas))
         .run();
