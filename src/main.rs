@@ -1,6 +1,6 @@
+use avian2d::prelude::*;
 use bevy::math::prelude::*;
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::*;
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
 #[cfg(target_os = "macos")]
@@ -48,7 +48,7 @@ fn main() {
     App::new()
         // Plugins
         .add_plugins(DefaultPlugins)
-        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
+        .add_plugins(PhysicsPlugins::default())
         // Resources
         .insert_resource(RandomSource(ChaCha8Rng::seed_from_u64(42)))
         .insert_resource(Arena(Rectangle::new(800., 600.)))
@@ -66,7 +66,11 @@ fn main() {
         })
         // Debug plugins
         .add_plugins(MeshPickingPlugin)
-        .add_plugins(RapierDebugRenderPlugin::default())
+        .add_plugins((
+            PhysicsDebugPlugin,
+            PhysicsDiagnosticsPlugin,
+            PhysicsDiagnosticsUiPlugin,
+        ))
         // Systems
         .add_systems(Startup, setup)
         .add_systems(FixedUpdate, (spawn_mobs, spawn_boubas))
