@@ -35,6 +35,9 @@ struct Arena(Rectangle);
 #[derive(Resource)]
 struct MobVelocityDistribution(Uniform<f32>);
 
+#[derive(Resource)]
+struct BoubaVelocityDistribution(Uniform<f32>);
+
 struct Settings {
     initial_mob_spawn_timer_interval: f32,
     initial_bouba_spawn_timer_interval: f32,
@@ -70,7 +73,10 @@ fn main() {
             bouba_scale: 2.,
         })
         .insert_resource(MobVelocityDistribution(
-            Uniform::new(-32., 32.).expect("Failed to create uniform distribution"),
+            Uniform::new(-64., 64.).expect("Failed to create uniform distribution"),
+        ))
+        .insert_resource(BoubaVelocityDistribution(
+            Uniform::new(-16., 16.).expect("Failed to create uniform distribution"),
         ))
         // Debug plugins
         .add_plugins(MeshPickingPlugin)
@@ -104,7 +110,6 @@ fn spawn_mobs(
 
     let rng = &mut rand_source.0;
     let pos = arena.0.sample_interior(rng);
-    let distr = Uniform::new(-10., 10.).expect("Failed to create uniform distribution");
     let mut collider = circle.collider();
     collider.set_scale(Vec2::splat(state.mob_scale), 32);
     commands.spawn((
@@ -130,6 +135,7 @@ fn spawn_boubas(
     arena: Res<Arena>,
     mut state: ResMut<State>,
     time: Res<Time>,
+    bouba_velocity_distribution: Res<BoubaVelocityDistribution>,
 ) {
     if !state.bouba_spawn_timer.tick(time.delta()).just_finished() {
         return;
@@ -137,7 +143,6 @@ fn spawn_boubas(
 
     let rng = &mut rand_source.0;
     let pos = arena.0.sample_interior(rng);
-    let distr = Uniform::new(-10., 10.).expect("Failed to create uniform distribution");
     let mut collider = Circle::new(16.).collider();
     collider.set_scale(Vec2::splat(state.bouba_scale), 32);
     commands.spawn((
@@ -147,7 +152,10 @@ fn spawn_boubas(
         RigidBody::Dynamic,
         Transform::from_translation(Vec3::new(pos.x, pos.y, 0.0))
             .with_scale(Vec3::splat(state.bouba_scale)),
-        LinearVelocity(Vec2::new(rng.sample(distr), rng.sample(distr))),
+        LinearVelocity(Vec2::new(
+            rng.sample(bouba_velocity_distribution.0),
+            rng.sample(bouba_velocity_distribution.0),
+        )),
         Restitution::new(1.),
     ));
 }
