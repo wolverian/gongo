@@ -88,7 +88,31 @@ fn main() {
         // Systems
         .add_systems(Startup, setup)
         .add_systems(FixedUpdate, (spawn_mobs, spawn_boubas))
+        .add_systems(FixedPostUpdate, intersection_tests)
         .run();
+}
+
+fn intersection_tests(
+    mut commands: Commands,
+    query: SpatialQuery,
+    mobs: Query<&Collider, With<Mob>>,
+    boubas: Query<(&Name, &Collider, &Transform), With<Bouba>>,
+) {
+    for mob in mobs.into_iter() {}
+    for (name, collider, transform) in boubas.into_iter() {
+        let intersections = query.shape_intersections(
+            collider,
+            transform.translation.truncate(),
+            transform.rotation.to_axis_angle().1,
+            &SpatialQueryFilter::default(),
+        );
+
+        for intersection in intersections {
+            let other = commands.entity(intersection);
+            // Handle the intersection (e.g., print details)
+            println!("Intersection detected: {:?} <-> {:?}", name, other.id());
+        }
+    }
 }
 
 fn spawn_mobs(
@@ -124,6 +148,7 @@ fn spawn_mobs(
             rng.sample(mob_velocity_distribution.0),
         )),
         Restitution::new(1.),
+        Mob,
     ));
 }
 
@@ -157,8 +182,15 @@ fn spawn_boubas(
             rng.sample(bouba_velocity_distribution.0),
         )),
         Restitution::new(1.),
+        Bouba,
     ));
 }
+
+#[derive(Component)]
+struct Mob;
+
+#[derive(Component)]
+struct Bouba;
 
 fn setup(
     mut commands: Commands,
